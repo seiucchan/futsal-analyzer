@@ -96,14 +96,15 @@ def main(config_path='../config/yolov3.cfg',
             for i in out_box_indices:
                 # sys.exit(0)
                 detections = np.delete(detections, i, 0)
+
             count_boxes.append(len(detections))
 
             detections = torch.tensor(detections)
 
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())
-                unique_labels = detections[:, -1].cpu().unique()
-                n_cls_preds = len(unique_labels)
+                # unique_labels = detections[:, -1].cpu().unique()
+                # n_cls_preds = len(unique_labels)
                 for x1, y1, x2, y2, obj_id in tracked_objects:
                     box_h = int(((y2 - y1) / unpad_h) * img.shape[0])
                     box_w = int(((x2 - x1) / unpad_w) * img.shape[1])

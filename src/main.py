@@ -27,7 +27,7 @@ import click
 @click.option('--nms_thres', default=0.4)
 @click.option('--videopath', default='seiucchanvideo.mp4')
 @click.option('--npoints', default=5)
-
+@click.option('--wname', default='MouseEvent')
 def main(config_path,
          weights_path,
          class_path,
@@ -35,7 +35,8 @@ def main(config_path,
          conf_thres,
          nms_thres,
          videopath,
-         npoints):
+         npoints,
+         wname):
 
     # Load model and weights
     model = Darknet(config_path, img_size).to("cpu")
@@ -46,12 +47,9 @@ def main(config_path,
     # Tensor = torch.cuda.FloatTensor
     Tensor = torch.Tensor
 
-
-
     vid = cv2.VideoCapture(videopath)
     ret, frame = vid.read()
     img = frame
-    wname = "MouseEvent"
     cv2.namedWindow(wname)
     ptlist = PointList(npoints)
     cv2.setMouseCallback(wname, onMouse, [wname, img, ptlist])

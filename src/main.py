@@ -15,15 +15,25 @@ import matplotlib.patches as patches
 from PIL import Image
 import cv2
 from IPython.display import clear_output
+import click
 
 
-def main(config_path='../config/yolov3.cfg',
-         weights_path='../weights/yolov3.weights',
-         class_path='../data/coco.names',
-         img_size=416,
-         conf_thres=0.8,
-         nms_thres=0.4,
-         videopath = '../seiucchanvideo.mp4'):
+@click.command()
+@click.option('--config_path', default='config/yolov3.cfg')
+@click.option('--weights_path', default='weights/yolov3.weights')
+@click.option('--class_path', default='data/coco.names')
+@click.option('--img_size', default=416)
+@click.option('--conf_thres', default=0.8)
+@click.option('--nms_thres', default=0.4)
+@click.option('--videopath', default='seiucchanvideo.mp4')
+
+def main(config_path,
+         weights_path,
+         class_path,
+         img_size,
+         conf_thres,
+         nms_thres,
+         videopath):
 
     # Load model and weights
     model = Darknet(config_path, img_size=416).to("cpu")

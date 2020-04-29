@@ -70,9 +70,7 @@ def main(config_path,
 
             pilimg = Image.fromarray(frame)
             detections = detect_image(pilimg, img_size, Tensor, model)
-            detections_ = np.array(detections)
-            detections = filter_coat(detections_, pilimg, img_size, ptlist)
-            detections = torch.tensor(detections)
+            detections = filter_coat(detections, pilimg, img_size, ptlist)
 
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())

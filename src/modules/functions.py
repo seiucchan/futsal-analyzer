@@ -85,8 +85,9 @@ def onMouse(event, x, y, flag, params):
             cv2.line(img, (ptlist.ptlist[4][0], ptlist.ptlist[4][1]),
                      (ptlist.ptlist[0][0], ptlist.ptlist[0][1]), (0, 255, 0), 3)
 
-def filter_coat(detections_, pilimg, img_size, ptlist):
+def filter_coat(detections, pilimg, img_size, ptlist):
     #exclude result of detection exceot person
+    detections_ = np.array(detections)
     out_box_indices = []
     detections = list()
     person_id = 0.0
@@ -118,6 +119,7 @@ def filter_coat(detections_, pilimg, img_size, ptlist):
         detections = np.delete(detections, i, 0)
 
     # count_boxes.append(len(detections))
+    detections = torch.tensor(detections)
     return detections
 
 

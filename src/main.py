@@ -84,7 +84,7 @@ def main(config_path='../config/yolov3.cfg',
                 x1 = int(((x1 - pad_x // 2) / unpad_w) * img.shape[1])
                 y2 = y1 + box_h
                 x2 = x1 + box_w
-                pt = ((x1 + x2) // 2, y2 - (box_h // 5) )
+                pt = ((x1 + x2) // 2, y2 - (box_h // 5))
                 # pt = revert_coord(pt)
 
                 result =  cv2.pointPolygonTest(ptlist.ptlist, pt, False)

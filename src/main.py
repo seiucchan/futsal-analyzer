@@ -1,7 +1,10 @@
-from modules.yolo import *
-from modules.sort import *
-from modules.functions import *
-from utils import *
+from modules.yolo.src.yolo import Darknet
+from modules.yolo.utils import parse_config, utils
+from modules.sort.sort import Sort
+from utils.detect import detect_image
+from utils.change_coord import change_coord
+from utils.visualization import visualization
+from utils.filter_court import PointList, onMouse, filter_court
 import os, sys, time, datetime, random
 sys.path.append(os.pardir)
 
@@ -68,7 +71,7 @@ def main(config_path,
 
             pilimg = Image.fromarray(frame)
             detections = detect_image(pilimg, img_size, Tensor, model)
-            detections = filter_coat(detections, pilimg, img_size, ptlist)
+            detections = filter_court(detections, pilimg, img_size, ptlist)
 
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())

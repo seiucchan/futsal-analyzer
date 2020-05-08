@@ -1,6 +1,6 @@
-/config
-/data
-/PyTorch-YOLOv3
-/weights
+__pycache__
+/config/
+/PyTorch-YOLOv3/
+/weights/
 /seiucchanvideo.mp4
-/src/__pycache__
+/data/

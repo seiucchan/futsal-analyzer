@@ -28,7 +28,7 @@ import click
 @click.option('--img_size', default=416)
 @click.option('--conf_thres', default=0.8)
 @click.option('--nms_thres', default=0.4)
-@click.option('--videopath', default='seiucchanvideo.mp4')
+@click.option('--videopath', default='data/seiucchanvideo.mp4')
 @click.option('--npoints', default=5)
 @click.option('--wname', default='MouseEvent')
 def main(config_path,

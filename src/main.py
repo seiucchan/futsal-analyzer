@@ -75,8 +75,8 @@ def main(config_path,
             
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())
-                pred = k_means(tracked_objects, pilimg, img_size, img)
-                visualization(tracked_objects, pilimg, img_size, img, classes, frame, pred)
+                preds = k_means(tracked_objects, pilimg, img_size, img)
+                visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
 
 
 if __name__ == '__main__':

@@ -5,9 +5,10 @@ from PIL import Image
 from utils.change_coord import change_coord
 
 
-def visualization(tracked_objects, pilimg, img_size, img, classes, frame, pred):
+def visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds):
     cmap = plt.get_cmap('tab20b')
     colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
+    font = cv2.FONT_HERSHEY_SIMPLEX
 
     pad_x, pad_y, unpad_h, unpad_w = change_coord(pilimg, img_size)
     for x1, y1, x2, y2, obj_id in tracked_objects:
@@ -19,6 +20,14 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, pred):
         color = [i * 255 for i in color]
         cls = classes[int(0)]
         cv2.rectangle(frame, (x1, y1), (x1+box_w, y1+box_h), color, 4)
+        pred_id = obj_id - 1
+        pred_id = int(pred_id)
+        # print(pred_id.dtype)
+        # print(preds[0].dtype)
+        if preds[pred_id] == 0:
+            cv2.putText(frame, 'team1', (x1, y1), font, 1,(255,255,255),2,cv2.LINE_AA)
+        else:
+            cv2.putText(frame, 'team2', (x1, y1), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.imshow("mot_tracker", frame)
     key = cv2.waitKey(1) & 0xFF
     return key

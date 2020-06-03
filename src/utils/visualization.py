@@ -11,6 +11,9 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     pad_x, pad_y, unpad_h, unpad_w = change_coord(pilimg, img_size)
+
+    i = 0
+
     for x1, y1, x2, y2, obj_id in tracked_objects:
         box_h = int(((y2 - y1) / unpad_h) * img.shape[0])
         box_w = int(((x2 - x1) / unpad_w) * img.shape[1])
@@ -20,14 +23,17 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
         color = [i * 255 for i in color]
         cls = classes[int(0)]
         cv2.rectangle(frame, (x1, y1), (x1+box_w, y1+box_h), color, 4)
-        pred_id = obj_id - 1
-        pred_id = int(pred_id)
+        # pred_id = obj_id - 1
+        # pred_id = int(pred_id)
+        print(len(preds), i)
         # print(pred_id.dtype)
         # print(preds[0].dtype)
-        if preds[pred_id] == 0:
+        if preds[i] == 0:
             cv2.putText(frame, 'team1', (x1, y1), font, 1,(255,255,255),2,cv2.LINE_AA)
         else:
             cv2.putText(frame, 'team2', (x1, y1), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
+
+        i += 1
     cv2.imshow("mot_tracker", frame)
     key = cv2.waitKey(1) & 0xFF
     return key

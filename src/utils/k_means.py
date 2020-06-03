@@ -36,5 +36,6 @@ def k_means(tracked_objects, pilimg, img_size, img):
     print(bbox_list_n)
     bbox_list_n = np.nan_to_num(bbox_list_n)
     bbox_list_n = np.float32(bbox_list_n)
-    pred = KMeans(n_clusters=2).fit_predict(bbox_list_n)
-    return pred
+    print(len(bbox_list_n))
+    preds = KMeans(n_clusters=3).fit_predict(bbox_list_n)
+    return preds

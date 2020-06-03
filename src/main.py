@@ -4,6 +4,7 @@ from modules.sort.sort import Sort
 from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
+from utils.k_means import k_means
 from utils.filter_court import PointList, onMouse, filter_court
 import os, sys, time, datetime, random
 sys.path.append(os.pardir)
@@ -74,7 +75,8 @@ def main(config_path,
             
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())
-                visualization(tracked_objects, pilimg, img_size, img, classes, frame)
+                pred = k_means(tracked_objects, pilimg, img_size, img)
+                visualization(tracked_objects, pilimg, img_size, img, classes, frame, pred)
 
 
 if __name__ == '__main__':

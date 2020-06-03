@@ -5,7 +5,7 @@ from PIL import Image
 from utils.change_coord import change_coord
 
 
-def visualization(tracked_objects, pilimg, img_size, img, classes, frame):
+def visualization(tracked_objects, pilimg, img_size, img, classes, frame, pred):
     cmap = plt.get_cmap('tab20b')
     colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
 

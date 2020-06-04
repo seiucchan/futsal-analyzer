@@ -25,13 +25,15 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
         cv2.rectangle(frame, (x1, y1), (x1+box_w, y1+box_h), color, 4)
         # pred_id = obj_id - 1
         # pred_id = int(pred_id)
-        print(len(preds), i)
+        print(preds, i)
         # print(pred_id.dtype)
         # print(preds[0].dtype)
         if preds[i] == 0:
             cv2.putText(frame, 'team1', (x1, y1), font, 1,(255,255,255),2,cv2.LINE_AA)
-        else:
+        elif preds[i] == 1:
             cv2.putText(frame, 'team2', (x1, y1), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
+        elif preds[i] == 2:
+            cv2.putText(frame, 'GK', (x1, y1), font, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
         i += 1
     cv2.imshow("mot_tracker", frame)

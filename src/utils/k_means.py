@@ -10,7 +10,7 @@ import pandas as pd
 from utils.change_coord import change_coord
 
 
-def k_means(tracked_objects, pilimg, img_size, img):
+def pre_k_means(tracked_objects, pilimg, img_size, img):
     img = np.array(pilimg)
     print(img.shape[0], img.shape[2])
     bbox_list = []
@@ -35,5 +35,6 @@ def k_means(tracked_objects, pilimg, img_size, img):
     bbox_list_n = np.array(bbox_list)
     bbox_list_n = np.nan_to_num(bbox_list_n)
     bbox_list_n = np.float32(bbox_list_n)
-    preds = KMeans(n_clusters=3).fit_predict(bbox_list_n)
-    return preds
+    print(bbox_list_n)
+
+    return bbox_list_n

@@ -4,7 +4,7 @@ from modules.sort.sort import Sort
 from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
-from utils.k_means import k_means
+from utils.k_means import pre_k_means
 from utils.filter_court import PointList, onMouse, filter_court
 import os, sys, time, datetime, random
 sys.path.append(os.pardir)
@@ -16,6 +16,8 @@ from torchvision import datasets, transforms
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from sklearn import datasets, preprocessing
+from sklearn.cluster import KMeans
 from PIL import Image
 import cv2
 from IPython.display import clear_output
@@ -75,9 +77,19 @@ def main(config_path,
             
             if detections is not None:
                 tracked_objects = mot_tracker.update(detections.cpu())
-                preds = k_means(tracked_objects, pilimg, img_size, img)
-                visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
+                bbox_list_n = pre_k_means(tracked_objects, pilimg, img_size, img)
 
+                if ii == 0:
+                    print('fit')
+                    # preds = KMeans(n_clusters=3).fit(bbox_list_n)
+                    k_means = KMeans(n_clusters=3).fit(bbox_list_n)
+
+                    preds = k_means.predict(bbox_list_n)
+
+                else:
+                    preds = k_means.predict(bbox_list_n)
+
+                visualization(tracked_objects, pilimg, img_size, img, classes, frame, preds)
 
 if __name__ == '__main__':
     main()

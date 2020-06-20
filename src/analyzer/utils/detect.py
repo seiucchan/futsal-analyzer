@@ -1,4 +1,4 @@
-from modules.yolo.utils.utils import non_max_suppression
+from modules.yolo.utils import non_max_suppression
 import torch
 from torchvision import transforms
 from torch.autograd import Variable

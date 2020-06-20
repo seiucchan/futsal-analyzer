@@ -1,6 +1,6 @@
-from modules.yolo.src.yolo import Darknet
-from modules.yolo.utils import parse_config, utils
-from modules.sort.sort import Sort
+from modules.yolo import Darknet
+from modules.yolo import utils
+from modules.sort import Sort
 from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
@@ -22,7 +22,7 @@ import click
 
 
 @click.command()
-@click.option('--config_path', default='config/yolov3.cfg')
+@click.option('--config_path', default='weights/configs/yolov3.cfg')
 @click.option('--weights_path', default='weights/yolov3.weights')
 @click.option('--class_path', default='data/coco.names')
 @click.option('--img_size', default=416)

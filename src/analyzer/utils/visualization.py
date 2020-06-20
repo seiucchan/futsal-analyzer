@@ -5,7 +5,7 @@ from PIL import Image
 from utils.change_coord import change_coord
 
 
-def visualization(tracked_objects, pilimg, img_size, img, classes, frame):
+def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_show):
     cmap = plt.get_cmap('tab20b')
     # colors = [cmap(i)[:3] for i in np.linspace(0, 1, 20)]
 
@@ -21,6 +21,7 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame):
         color = [0, 255, 255]
         cls = classes[int(0)]
         cv2.rectangle(frame, (x1, y1), (x1+box_w, y1+box_h), color, 4)
-    cv2.imshow("mot_tracker", frame)
+    if is_show:
+        cv2.imshow("mot_tracker", frame)
     key = cv2.waitKey(1) & 0xFF
-    return key
+    return frame

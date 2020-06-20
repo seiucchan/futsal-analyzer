@@ -1,24 +1,35 @@
-from modules.yolo import Darknet
-from modules.yolo import utils
-from modules.sort import Sort
-from utils.detect import detect_image
-from utils.change_coord import change_coord
-from utils.visualization import visualization
-from utils.filter_court import PointList, onMouse, filter_court
-import os, sys, time, datetime, random
-sys.path.append(os.pardir)
+import datetime
+import os
+import random
+import sys
+import time
+from typing import NewType, Tuple
 
-
+import click
+import cv2
+from IPython.display import clear_output
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from PIL import Image
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from PIL import Image
-import cv2
-from IPython.display import clear_output
-import click
+
+from modules.yolo import Darknet
+from modules.yolo import utils
+# from modules.sort import Sort
+from modules.color_classification import team_classifier
+from modules.plane_field_conversion import vid2plane, draw_player_positions
+from utils.detect import detect_image
+from utils.change_coord import change_coord
+from utils.visualization import visualization
+from utils.filter_court import PointList, onMouse, filter_court
+
+
+VideoRead = NewType('VideoRead', cv2.VideoCapture)
+VideoWrite = NewType('VideoWrite', cv2.VideoWriter)
 
 
 @click.command()
@@ -28,20 +39,26 @@ import click
 @click.option('--img_size', default=416)
 @click.option('--conf_thres', default=0.8)
 @click.option('--nms_thres', default=0.4)
-@click.option('--videopath', default='data/seiucchanvideo.mp4')
+@click.option('--input', default='data/seiucchanvideo.mp4')
+@click.option('--output', default='data/out.avi')
 @click.option('--npoints', default=5)
 @click.option('--wname', default='MouseEvent')
 @click.option('--gpu_id', default=1)
+@click.option('--is_show', default=True)
+@click.option('--write_video', default=False)
 def main(config_path,
          weights_path,
          class_path,
          img_size,
          conf_thres,
          nms_thres,
-         videopath,
+         input,
+         output,
          npoints,
          wname,
-         gpu_id):
+         gpu_id, 
+         is_show,
+         write_video):
 
     # device
     device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
@@ -54,37 +71,93 @@ def main(config_path,
 
     classes = utils.load_classes(class_path)
 
-    tracker = Sort()
+    # tracker = Sort()
 
-    vid = cv2.VideoCapture(videopath)
-    ret, frame = vid.read()
+    # input video
+    cap, origin_fps, num_frames, width, height = load_video(input)
+    # output video
+    if write_video:
+        writer = video_writer(output, origin_fps, width, height)
+
+    # user input
+    ret, frame = cap.read()
     if not ret:
-        raise RuntimeError("Video cant be loaded.")
-
+        raise RuntimeError()
     cv2.namedWindow(wname)
     ptlist = PointList(npoints)
     cv2.setMouseCallback(wname, onMouse, [wname, frame, ptlist])
     cv2.waitKey()
     cv2.destroyAllWindows()
 
-    cnt = 0
-    while(True):
-        ret, frame = vid.read()
+    cnt = 1
+    while(cap.isOpened()):
+        print('')
+        ret, frame = cap.read()
         if not ret:
             break
-        print(f"frame: {cnt}")
+
+        print('-----------------------------------------------------')
+        print('[INFO] Count: {}/{}'.format(cnt, num_frames))
 
         pilimg = Image.fromarray(frame)
-        detections = detect_image(pilimg, img_size, model, device)
-        detections = filter_court(detections, pilimg, img_size, ptlist)
+        bboxes = detect_image(pilimg, img_size, model, device)
+        bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
+        print(f"[INFO] {len(bboxes)} persons are detected.")
+
+        if bboxes is not None:
+            # tracked_objects = tracker.update(bboxes.cpu())
+            out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show)
         
-        if detections is not None:
-            tracked_objects = tracker.update(detections.cpu())
-            visualization(tracked_objects, pilimg, img_size, frame, classes, frame)
-        
+        # team classification
+        # teams: len = len(bboxes), team_idが要素, team_idはユーザの入力を元にする
+        # teams :list = team_classifier(bboxes, pilimg)
+
+        # map to 2d field
+        # plane_positions: len = len(bboxes), (x, y)が要素
+        # plane_positions :list = vid2plane(team_bboxes, ptlist.ptlist, pilimg.size)
+
+        # visualize player position in 2d coart
+        # coart: shape = frame.shape, フットサルコート (ウイイレの小さいコートの図)
+        # coart :np.ndarray = draw_player_positions(pilimg, plane_positions, teams)
+
+        if write_video:
+            writer.write(out)
+            # 最終的には，動画のしたにコートの映像をくっつけるので，下にようにする．
+            # 加えて，video_writerの中のheight * 2のコメントアウトを外す
+            # writer.write(np.concatenate([out, coart], axis=1))
         cnt += 1
 
-    print("End processing.")
+        if cnt > 100:
+            break
+
+    print("[INFO] End processing.")
+    cap.release()
+    writer.release()
+
+
+def load_video(path: str) -> Tuple[VideoRead, int, int, int, int]:
+    print('[INFO] Loading "{}" ...'.format(path))
+    cap = cv2.VideoCapture(path)
+    W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    print('[INFO] total frame: {}, fps: {}, width: {}, height: {}'.format(frames, fps, W, H))
+    return cap, fps, frames, W, H
+
+
+def video_writer(path: str, fps: int, width: int, height: int,
+                 resize_factor: float =None) -> VideoWrite:
+    print("[INFO] Save output video in", path)
+    if resize_factor is not None:
+        width = int(width * resize_factor)
+        height = int(height * resize_factor)
+        width -= width % 4
+        height -= height % 4
+    # height *= 2
+    fourcc = cv2.VideoWriter_fourcc(*'MPEG')
+    writer = cv2.VideoWriter(path, fourcc, fourcc, (width, height))
+    return writer
 
 
 if __name__ == '__main__':

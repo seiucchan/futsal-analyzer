@@ -31,6 +31,7 @@ import click
 @click.option('--videopath', default='data/seiucchanvideo.mp4')
 @click.option('--npoints', default=5)
 @click.option('--wname', default='MouseEvent')
+@click.option('--gpu_id', default=1)
 def main(config_path,
          weights_path,
          class_path,
@@ -39,42 +40,51 @@ def main(config_path,
          nms_thres,
          videopath,
          npoints,
-         wname):
+         wname,
+         gpu_id):
+
+    # device
+    device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
 
     # Load model and weights
     model = Darknet(config_path, img_size).to("cpu")
     model.load_darknet_weights(weights_path)
-    # model.cuda()
+    model.to(device)
     model.eval()
+
     classes = utils.load_classes(class_path)
-    # Tensor = torch.cuda.FloatTensor
-    Tensor = torch.Tensor
+
+    tracker = Sort()
 
     vid = cv2.VideoCapture(videopath)
     ret, frame = vid.read()
-    img = frame
+    if not ret:
+        raise RuntimeError("Video cant be loaded.")
+
     cv2.namedWindow(wname)
     ptlist = PointList(npoints)
-    cv2.setMouseCallback(wname, onMouse, [wname, img, ptlist])
+    cv2.setMouseCallback(wname, onMouse, [wname, frame, ptlist])
     cv2.waitKey()
     cv2.destroyAllWindows()
-    mot_tracker = Sort()
-    count_boxes = []
 
+    cnt = 0
     while(True):
-        for ii in range(4000):
-            ret, frame = vid.read()
+        ret, frame = vid.read()
+        if not ret:
+            break
+        print(f"frame: {cnt}")
 
-            if type(frame) == type(None):
-                # print('ratio:', np.mean(count_boxes) / 10)
-                sys.exit(0)
-            pilimg = Image.fromarray(frame)
-            detections = detect_image(pilimg, img_size, Tensor, model)
-            detections = filter_court(detections, pilimg, img_size, ptlist)
-            
-            if detections is not None:
-                tracked_objects = mot_tracker.update(detections.cpu())
-                visualization(tracked_objects, pilimg, img_size, img, classes, frame)
+        pilimg = Image.fromarray(frame)
+        detections = detect_image(pilimg, img_size, model, device)
+        detections = filter_court(detections, pilimg, img_size, ptlist)
+        
+        if detections is not None:
+            tracked_objects = tracker.update(detections.cpu())
+            visualization(tracked_objects, pilimg, img_size, frame, classes, frame)
+        
+        cnt += 1
+
+    print("End processing.")
 
 
 if __name__ == '__main__':

@@ -73,9 +73,9 @@ def main(config_path,
                 sys.exit(0)
             pilimg = Image.fromarray(frame)
             detections = detect_image(pilimg, img_size, Tensor, model)
-            detections = filter_court(detections, pilimg, img_size, ptlist)
             
             if detections is not None:
+                detections = filter_court(detections, pilimg, img_size, ptlist)
                 tracked_objects = mot_tracker.update(detections.cpu())
                 bbox_list_n = pre_k_means(tracked_objects, pilimg, img_size, img)
 

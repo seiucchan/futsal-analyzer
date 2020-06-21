@@ -1,7 +1,8 @@
 from __future__ import division
 
-from modules.yolo.src import yolo
-from modules.yolo.utils import *
+from modules.yolo.src.yolo import *
+from modules.yolo.utils.parse_config import parse_data_config
+from modules.yolo.utils.utils import load_classes
 from train.utils.datasets import *
 # from train.utils.parse_config import *
 

@@ -7,3 +7,8 @@ __pycache__
 /train/
 chasca
 seiucchan@chasca
+/futsal-ball-img/
+/futsal-ball-img_output/
+/checkpoints_ball/
+/checkpoints_ball_person/
+*.json

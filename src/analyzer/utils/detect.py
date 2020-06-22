@@ -27,4 +27,4 @@ def detect_image(img, img_size, model, device):
     with torch.no_grad():
         detections = model(inp)
         detections = non_max_suppression(detections, 0.5, 0.4)
-    return detections[0]
+    return detections[0] if detections[0] is not None else []

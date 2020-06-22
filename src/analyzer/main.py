@@ -101,10 +101,11 @@ def main(config_path,
 
         pilimg = Image.fromarray(frame)
         bboxes = detect_image(pilimg, img_size, model, device)
-        bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
         print(f"[INFO] {len(bboxes)} persons are detected.")
 
-        if bboxes is not None:
+        out = frame
+        if bboxes:
+            bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
             # tracked_objects = tracker.update(bboxes.cpu())
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show)
         

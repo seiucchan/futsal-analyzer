@@ -28,13 +28,13 @@ def onMouse(event, x, y, flag, params):
 
     if event == cv2.EVENT_LBUTTONDOWN:  # レフトボタンをクリックしたとき、ptlist配列にx,y座標を格納する
         if ptlist.add(x, y):
-            print('[%d] ( %d, %d )' % (ptlist.pos - 1, x, y))
+            print('Corner: [%d] ( %d, %d )' % (ptlist.pos - 1, x, y))
             cv2.circle(img, (x, y), 3, (0, 0, 255), 3)
             cv2.imshow(wname, img)
         else:
             print('All points have selected.  Press ESC-key.')
         if(ptlist.pos == ptlist.npoints):
-            print(ptlist.ptlist)
+            # print("All Corners:\n", ptlist.ptlist)
             cv2.line(img, (ptlist.ptlist[0][0], ptlist.ptlist[0][1]),
                      (ptlist.ptlist[1][0], ptlist.ptlist[1][1]), (0, 255, 0), 3)
             cv2.line(img, (ptlist.ptlist[1][0], ptlist.ptlist[1][1]),
@@ -45,6 +45,7 @@ def onMouse(event, x, y, flag, params):
                      (ptlist.ptlist[4][0], ptlist.ptlist[4][1]), (0, 255, 0), 3)
             cv2.line(img, (ptlist.ptlist[4][0], ptlist.ptlist[4][1]),
                      (ptlist.ptlist[0][0], ptlist.ptlist[0][1]), (0, 255, 0), 3)
+            print()
 
 def filter_court(detections, pilimg, img_size, ptlist):
     #exclude result of detection exceot person

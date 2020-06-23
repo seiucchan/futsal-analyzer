@@ -1,8 +1,10 @@
 from __future__ import division
 
-from modules.yolo.src import yolo
-from modules.yolo.utils import *
-from train.utils import *
+from modules.utils import *
+from modules.augmentations import *
+from modules.logger import *
+from modules.model import *
+from modules.datasets import *
 from test import evaluate
 
 from terminaltables import AsciiTable

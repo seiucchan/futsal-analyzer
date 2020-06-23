@@ -28,6 +28,9 @@ import glob
 import time
 import argparse
 from filterpy.kalman import KalmanFilter
+import warnings
+
+warnings.simplefilter('ignore')
 
 @jit
 def iou(bb_test,bb_gt):

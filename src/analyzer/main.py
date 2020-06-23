@@ -26,6 +26,7 @@ from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
 from utils.filter_court import PointList, onMouse, filter_court
+from utils.paint_black import paint_black
 
 
 VideoRead = NewType('VideoRead', cv2.VideoCapture)
@@ -33,7 +34,7 @@ VideoWrite = NewType('VideoWrite', cv2.VideoWriter)
 
 
 @click.command()
-@click.option('--config_path', default='weights/configs/yolov3.cfg')
+@click.option('--config_path', default='config/yolov3.cfg')
 @click.option('--weights_path', default='weights/yolov3.weights')
 @click.option('--class_path', default='data/coco.names')
 @click.option('--img_size', default=416)
@@ -103,14 +104,16 @@ def main(config_path,
         print('[INFO] Count: {}/{}'.format(cnt, num_frames))
 
         pilimg = Image.fromarray(frame)
-        bboxes = detect_image(pilimg, img_size, model, device)
+        bboxes = detect_image(pilimg, img_size, model, device, conf_thres, nms_thres)
         print(f"[INFO] {len(bboxes)} persons are detected.")
 
         out = frame
-        if bboxes:
+        if bboxes is not None:
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
             # tracked_objects = tracker.update(bboxes.cpu())
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show)
+            planefield_input = paint_black(frame, ptlist.ptlist)
+            cv2.imshow("test",planefield_input)
         
         # team classification
         # teams: len = len(bboxes), team_idが要素, team_idはユーザの入力を元にする

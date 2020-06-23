@@ -4,7 +4,7 @@ from torchvision import transforms
 from torch.autograd import Variable
 
 
-def detect_image(img, img_size, model, device):
+def detect_image(img, img_size, model, device, conf_thres, nms_thres):
     # scale and pad image
     ratio = min(img_size/img.size[0], img_size/img.size[1])
     imw = round(img.size[0] * ratio)
@@ -26,5 +26,5 @@ def detect_image(img, img_size, model, device):
     # run inference on the model and get detections
     with torch.no_grad():
         detections = model(inp)
-        detections = non_max_suppression(detections, 0.5, 0.4)
+        detections = non_max_suppression(detections, conf_thres, nms_thres)
     return detections[0] if detections[0] is not None else []

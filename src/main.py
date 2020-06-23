@@ -46,7 +46,10 @@ def main(config_path,
 
     # Load model and weights
     model = Darknet(config_path, img_size).to("cpu")
-    model.load_darknet_weights(weights_path)
+    if weights_path.endswith(".weights"):
+        model.load_darknet_weights(weights_path)
+    else:
+        model.load_state_dict(torch.load(weights_path, map_location="cpu"))
     # model.cuda()
     model.eval()
     classes = utils.load_classes(class_path)
@@ -67,14 +70,16 @@ def main(config_path,
     while(True):
         for ii in range(4000):
             ret, frame = vid.read()
+            print(0)
 
             if type(frame) == type(None):
                 # print('ratio:', np.mean(count_boxes) / 10)
                 sys.exit(0)
             pilimg = Image.fromarray(frame)
-            detections = detect_image(pilimg, img_size, Tensor, model)
-            
+            detections = detect_image(pilimg, img_size, Tensor, model, conf_thres, nms_thres)
+
             if detections is not None:
+                print(1)
                 detections = filter_court(detections, pilimg, img_size, ptlist)
                 tracked_objects = mot_tracker.update(detections.cpu())
                 bbox_list_n = pre_k_means(tracked_objects, pilimg, img_size, img)

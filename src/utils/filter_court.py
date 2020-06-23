@@ -52,8 +52,9 @@ def filter_court(detections, pilimg, img_size, ptlist):
     out_box_indices = []
     detections = list()
     person_id = 0.0
+    ball_id = 1.0
     for det in detections_:
-        if det[6] == person_id:
+        if det[6] == person_id or ball_id:
             detections.append(det)
     detections = np.array(detections)
 

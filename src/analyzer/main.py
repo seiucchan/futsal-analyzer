@@ -128,8 +128,8 @@ def main(config_path,
             # writer.write(np.concatenate([out, coart], axis=1))
         cnt += 1
 
-        if cnt > 100:
-            break
+        # if cnt > 100:
+        #     break
 
     print("[INFO] End processing.")
     cap.release()

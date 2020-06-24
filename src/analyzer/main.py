@@ -20,7 +20,7 @@ from torch.autograd import Variable
 from modules.yolo import Darknet
 from modules.yolo import utils
 # from modules.sort import Sort
-from modules.color_classification import team_classifier
+from modules.color_classification import team_classifier, team_input
 from modules.plane_field_conversion import vid2plane, draw_player_positions
 from utils.detect import detect_image
 from utils.change_coord import change_coord
@@ -92,6 +92,11 @@ def main(config_path,
     cv2.setMouseCallback(wname, onMouse, [wname, frame, ptlist])
     cv2.waitKey()
     cv2.destroyAllWindows()
+
+    player_cluster1 = team_input(frame, 1)
+    palyer_cluster2 = team_input(frame, 2)
+    player_cluster3 = team_input(frame, 3)
+    player_cluster4 = team_input(frame, 4)
 
     cnt = 1
     while(cap.isOpened()):

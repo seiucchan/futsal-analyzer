@@ -20,7 +20,7 @@ from torch.autograd import Variable
 from modules.yolo import Darknet
 from modules.yolo import utils
 # from modules.sort import Sort
-from modules.color_classification import team_classifier, team_input
+from modules.color_classification import team_classifier, team_input, color_mean
 from modules.plane_field_conversion import vid2plane, draw_player_positions
 from utils.detect import detect_image
 from utils.change_coord import change_coord
@@ -94,9 +94,19 @@ def main(config_path,
     cv2.destroyAllWindows()
 
     player_cluster1 = team_input(frame, 1)
-    palyer_cluster2 = team_input(frame, 2)
+    player_cluster2 = team_input(frame, 2)
     player_cluster3 = team_input(frame, 3)
     player_cluster4 = team_input(frame, 4)
+
+    player_cluster1 = color_mean(frame, player_cluster1)
+    player_cluster2 = color_mean(frame, player_cluster2)
+    player_cluster3 = color_mean(frame, player_cluster3)
+    player_cluster4 = color_mean(frame, player_cluster4)
+    print(player_cluster1)
+    print(player_cluster2)
+    print(player_cluster3)
+    print(player_cluster4)
+
 
     cnt = 1
     while(cap.isOpened()):

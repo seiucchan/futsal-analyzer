@@ -5,7 +5,7 @@ from utils.change_coord import change_coord
 
 
 def calculate_matrix():
-    p_original = np.float32([[25, 268], [835, 716], [1250, 146], [837, 52]])
+    p_original = np.float32([[25, 268], [593, 1150], [1250, 146], [837, 52]])
     p_trans = np.float32([[140, 110], [140, 610], [1140, 610], [1140, 110]])
     M = cv2.getPerspectiveTransform(p_original, p_trans)
 

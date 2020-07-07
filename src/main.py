@@ -21,7 +21,7 @@ from modules.yolo import Darknet
 from modules.yolo import utils
 # from modules.sort import Sort
 from modules.color_classification import team_classifier, team_input, color_mean
-from modules.plane_field_conversion import calculate_matrix, generate_plane_field, vid2plane, draw_player_positions
+from modules.plane_field_conversion import calculate_matrix, generate_plane_field, draw_player_positions
 from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
@@ -93,8 +93,6 @@ def main(config_path,
     cv2.waitKey()
     cv2.destroyAllWindows()
 
-    M = calculate_matrix()
-
     player_cluster1 = team_input(frame, 1)
     player_cluster2 = team_input(frame, 2)
     player_cluster3 = team_input(frame, 3)
@@ -105,6 +103,7 @@ def main(config_path,
     player_cluster3 = color_mean(frame, player_cluster3)
     player_cluster4 = color_mean(frame, player_cluster4)
 
+    M = calculate_matrix()
 
     cnt = 1
     while(cap.isOpened()):
@@ -126,7 +125,7 @@ def main(config_path,
             print(f"[INFO] {len(bboxes)} persons are detected.")
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds)
-            output_img = draw_player_positions(frame, bboxes, M, output_img, img_size)
+            output_img = draw_player_positions(frame, bboxes, M, output_img, img_size, preds)
             cv2.imshow("output_img", output_img)
 
             # planefield_input = paint_black(frame, ptlist.ptlist)

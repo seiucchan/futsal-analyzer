@@ -27,6 +27,7 @@ from utils.change_coord import change_coord
 from utils.visualization import visualization
 from utils.filter_court import PointList, onMouse, filter_court
 from utils.paint_black import paint_black
+from utils.max_ball_selection import max_ball_selection
 
 
 VideoRead = NewType('VideoRead', cv2.VideoCapture)
@@ -122,6 +123,7 @@ def main(config_path,
         output_img = generate_plane_field()
         if bboxes is not None:
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
+            bboxes = max_ball_selection(bboxes)
             print(f"[INFO] {len(bboxes)} persons are detected.")
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds)

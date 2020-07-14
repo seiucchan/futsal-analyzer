@@ -24,7 +24,7 @@ def generate_plane_field():
 def draw_player_positions(frame, bboxes, M, output_img, img_size, preds):
     pad_x, pad_y, unpad_h, unpad_w = change_coord(frame, img_size)
     i = 0
-    for x1, y1, x2, y2, _, _, _ in bboxes:
+    for x1, y1, x2, y2, _, _, cls_id in bboxes:
         x1 = int(((x1 - pad_x // 2) / unpad_w) * frame.shape[1])
         x2 = int(((x2 - pad_x // 2) / unpad_w) * frame.shape[1])
         y1 = int(((y1 - pad_y // 2) / unpad_h) * frame.shape[0])
@@ -34,14 +34,17 @@ def draw_player_positions(frame, bboxes, M, output_img, img_size, preds):
         object_position = np.float32([[[x, y]]])
         pts_trans = cv2.perspectiveTransform(object_position, M)
         pts_trans = tuple(pts_trans[0][0])
-        if preds[i] == 0:
-            cv2.circle(output_img, pts_trans, 20, (0, 255, 255), -1)
-        elif preds[i] == 1:
-            cv2.circle(output_img, pts_trans, 20, (255, 255, 255), -1)
-        elif preds[i] == 2:
-            cv2.circle(output_img, pts_trans, 20, (0, 0, 255), -1)
+        if cls_id == 0:
+            if preds[i] == 0:
+                cv2.circle(output_img, pts_trans, 20, (0, 255, 255), -1)
+            elif preds[i] == 1:
+                cv2.circle(output_img, pts_trans, 20, (255, 255, 255), -1)
+            elif preds[i] == 2:
+                cv2.circle(output_img, pts_trans, 20, (0, 0, 255), -1)
+            else:
+                cv2.circle(output_img, pts_trans, 20, (255, 0, 0), -1)
         else:
-            cv2.circle(output_img, pts_trans, 20, (255, 0, 0), -1)
+            cv2.circle(output_img, pts_trans, 10, (0, 255, 0), -1)
 
         i += 1
 

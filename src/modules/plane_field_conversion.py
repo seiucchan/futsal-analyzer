@@ -12,7 +12,7 @@ def calculate_matrix():
     return M
 
 def generate_plane_field():
-    output_img = np.zeros([720, 1280, 3])
+    output_img = np.zeros([720, 1280, 3], dtype="uint8")
     cv2.line(output_img, (140, 110), (140, 610), (255, 255, 255), thickness=5, lineType=cv2.LINE_4)
     cv2.line(output_img, (140, 110), (1140, 110), (255, 255, 255), thickness=5, lineType=cv2.LINE_4)
     cv2.line(output_img, (1140, 110), (1140, 610), (255, 255, 255), thickness=5, lineType=cv2.LINE_4)
@@ -47,6 +47,8 @@ def draw_player_positions(frame, bboxes, M, output_img, img_size, preds):
             cv2.circle(output_img, pts_trans, 10, (0, 255, 0), -1)
 
         i += 1
+
+    cv2.imshow("output_img", output_img)
 
 
     return output_img

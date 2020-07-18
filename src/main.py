@@ -42,12 +42,12 @@ VideoWrite = NewType('VideoWrite', cv2.VideoWriter)
 @click.option('--conf_thres', default=0.8)
 @click.option('--nms_thres', default=0.4)
 @click.option('--input', default='data/seiucchanvideo.mp4')
-@click.option('--output', default='data/out.avi')
+@click.option('--output', default='data/out.mp4')
 @click.option('--npoints', default=5)
 @click.option('--wname', default='MouseEvent')
 @click.option('--gpu_id', default=1)
 @click.option('--is_show', default=True)
-@click.option('--write_video', default=False)
+@click.option('--write_video', default=True)
 def main(config_path,
          weights_path,
          class_path,
@@ -123,33 +123,16 @@ def main(config_path,
         output_img = generate_plane_field()
         if bboxes is not None:
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
-            bboxes = max_ball_selection(bboxes)
+            # bboxes = max_ball_selection(bboxes)
             print(f"[INFO] {len(bboxes)} persons are detected.")
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds)
             output_img = draw_player_positions(frame, bboxes, M, output_img, img_size, preds)
-            cv2.imshow("output_img", output_img)
-
-            # planefield_input = paint_black(frame, ptlist.ptlist)
-            # cv2.imshow("test",planefield_input)
-        
-        # map to 2d field
-        # plane_positions: len = len(bboxes), (x, y)が要素
-        # plane_positions :list = vid2plane(team_bboxes, ptlist.ptlist, pilimg.size)
-
-        # visualize player position in 2d coart
-        # coart: shape = frame.shape, フットサルコート (ウイイレの小さいコートの図)
-        # coart :np.ndarray = draw_player_positions(pilimg, plane_positions, teams)
 
         if write_video:
-            writer.write(out)
-            # 最終的には，動画のしたにコートの映像をくっつけるので，下にようにする．
-            # 加えて，video_writerの中のheight * 2のコメントアウトを外す
-            # writer.write(np.concatenate([out, coart], axis=1))
+            writer.write(np.concatenate([out, output_img], axis=0))
         cnt += 1
 
-        # if cnt > 100:
-        #     break
 
     print("[INFO] End processing.")
     cap.release()
@@ -175,9 +158,9 @@ def video_writer(path: str, fps: int, width: int, height: int,
         height = int(height * resize_factor)
         width -= width % 4
         height -= height % 4
-    # height *= 2
-    fourcc = cv2.VideoWriter_fourcc(*'MPEG')
-    writer = cv2.VideoWriter(path, fourcc, fourcc, (width, height))
+    height *= 2
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    writer = cv2.VideoWriter(path, fourcc, 20.0, (width, height))
     return writer
 
 

@@ -8,7 +8,7 @@ def max_ball_selection(bboxes):
         else:
             new_bboxes.append(bbox)
         i += 1
-    if ball_probability is not None:
+    if ball_probability:
         max_ball_probability_index = max(ball_probability)
         new_bboxes.append(bboxes[max_ball_probability_index])
 

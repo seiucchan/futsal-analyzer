@@ -28,6 +28,8 @@ from utils.visualization import visualization
 from utils.filter_court import PointList, onMouse, filter_court
 from utils.paint_black import paint_black
 from utils.max_ball_selection import max_ball_selection
+from utils.calculate_posession import predict_ball_holder
+from utils.calculate_posession import calculate_posession
 
 
 VideoRead = NewType('VideoRead', cv2.VideoCapture)
@@ -105,6 +107,7 @@ def main(config_path,
     player_cluster4 = color_mean(frame, player_cluster4)
 
     M = calculate_matrix()
+    ball_holders = []
 
     cnt = 1
     while(cap.isOpened()):
@@ -124,8 +127,13 @@ def main(config_path,
         if bboxes is not None:
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
             bboxes = max_ball_selection(bboxes)
-            print(f"[INFO] {len(bboxes)} persons are detected.")
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
+            ball_holders.append(predict_ball_holder(bboxes, preds, M, frame, img_size))
+            print("ball_holders: ", ball_holders)
+            posession_rate = calculate_posession(ball_holders)
+        
+            for i, p_rate in enumerate(posession_rate):
+                print("[INFO] posseion_rate team{}: {}".format(i+1, p_rate))
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds)
             output_img = draw_player_positions(frame, bboxes, M, output_img, img_size, preds)
 

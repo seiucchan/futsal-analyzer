@@ -22,6 +22,7 @@ from modules.yolo import utils
 # from modules.sort import Sort
 from modules.color_classification import team_classifier, team_input, color_mean
 from modules.plane_field_conversion import calculate_matrix, generate_plane_field, draw_player_positions
+from modules.sort import *
 from utils.detect import detect_image
 from utils.change_coord import change_coord
 from utils.visualization import visualization
@@ -109,6 +110,7 @@ def main(config_path,
     M = calculate_matrix()
     ball_holders = []
 
+    mot_tracker = Sort()
     cnt = 1
     while(cap.isOpened()):
         print('')
@@ -126,6 +128,7 @@ def main(config_path,
         output_img = generate_plane_field()
         if bboxes is not None:
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
+            track_bbs_ids = mot_tracker.update(bboxes)
             bboxes = max_ball_selection(bboxes)
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             ball_holders.append(predict_ball_holder(bboxes, preds, M, frame, img_size))
@@ -134,7 +137,7 @@ def main(config_path,
         
             for i, p_rate in enumerate(posession_rate):
                 print("[INFO] posseion_rate team{}: {}".format(i+1, p_rate))
-            out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds)
+            out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds, track_bbs_ids)
             output_img = draw_player_positions(frame, bboxes, M, output_img, img_size, preds)
 
         if write_video:

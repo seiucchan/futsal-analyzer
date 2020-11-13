@@ -12,4 +12,4 @@ def max_ball_selection(bboxes):
         max_ball_probability_index = max(ball_probability)
         new_bboxes.append(bboxes[max_ball_probability_index])
 
-    return new_bboxes
+    return list(new_bboxes)

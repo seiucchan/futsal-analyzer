@@ -5,7 +5,7 @@ from PIL import Image
 from utils.change_coord import change_coord
 
 
-def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_show, preds):
+def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_show, preds, track_bbs_ids):
     cmap = plt.get_cmap('tab20b')
     font = cv2.FONT_HERSHEY_COMPLEX
     pad_x, pad_y, unpad_h, unpad_w = change_coord(pilimg, img_size)
@@ -34,6 +34,14 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_sho
                 cv2.putText(frame, '2', (x1, y1), font, 1, (255, 0, 0), 2, cv2.LINE_AA)
             else:
                 cv2.putText(frame, '3', (x1, y1), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        
+    for x1, y1, x2, y2, tracked_id in track_bbs_ids:
+        box_h = int(((y2 - y1) / unpad_h) * img.shape[0])
+        box_w = int(((x2 - x1) / unpad_w) * img.shape[1])
+        y1 = int(((y1 - pad_y // 2) / unpad_h) * img.shape[0])
+        x1 = int(((x1 - pad_x // 2) / unpad_w) * img.shape[1])
+        tracked_id = str(tracked_id)
+        cv2.putText(frame, tracked_id, (int(x1), int(y1+10)), font, 1, (255, 255, 0), 2, cv2.LINE_AA)
 
 
         i += 1

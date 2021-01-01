@@ -133,10 +133,10 @@ def main(config_path,
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             ball_holders.append(predict_ball_holder(bboxes, preds, M, frame, img_size))
             print("ball_holders: ", ball_holders)
-            posession_rate = calculate_posession(ball_holders)
+            # posession_rate = calculate_posession(ball_holders)
         
-            for i, p_rate in enumerate(posession_rate):
-                print("[INFO] posseion_rate team{}: {}".format(i+1, p_rate))
+            # for i, p_rate in enumerate(posession_rate):
+            #     print("[INFO] posseion_rate team{}: {}".format(i+1, p_rate))
             out = visualization(bboxes, pilimg, img_size, frame, classes, frame, is_show, preds, track_bbs_ids)
             output_img = draw_player_positions(frame, bboxes, M, output_img, img_size, preds)
 

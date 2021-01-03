@@ -34,6 +34,8 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_sho
                 cv2.putText(frame, '2', (x1, y1), font, 1, (255, 0, 0), 2, cv2.LINE_AA)
             else:
                 cv2.putText(frame, '3', (x1, y1), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+        i += 1
         
     for x1, y1, x2, y2, tracked_id in track_bbs_ids:
         box_h = int(((y2 - y1) / unpad_h) * img.shape[0])
@@ -43,8 +45,6 @@ def visualization(tracked_objects, pilimg, img_size, img, classes, frame, is_sho
         tracked_id = str(tracked_id)
         cv2.putText(frame, tracked_id, (int(x1), int(y1+10)), font, 1, (255, 255, 0), 2, cv2.LINE_AA)
 
-
-        i += 1
     cv2.imshow("mot_tracker", frame)
 
     if is_show:

@@ -19,7 +19,6 @@ from torch.autograd import Variable
 
 from modules.yolo import Darknet
 from modules.yolo import utils
-# from modules.sort import Sort
 from modules.color_classification import team_classifier, team_input, color_mean
 from modules.plane_field_conversion import calculate_matrix, generate_plane_field, draw_player_positions
 from modules.sort import *
@@ -78,8 +77,6 @@ def main(config_path,
     model.eval()
 
     classes = utils.load_classes(class_path)
-
-    # tracker = Sort()
 
     # input video
     cap, origin_fps, num_frames, width, height = load_video(input)

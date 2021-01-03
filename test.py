@@ -21,59 +21,35 @@ import torch.optim as optim
 
 
 def evaluate(model, path, iou_thres, conf_thres, nms_thres, img_size, batch_size):
-    print(0)
     model.eval()
-    print(1)
 
     # Get dataloader
     dataset = ListDataset(path, img_size=img_size, augment=False, multiscale=False)
-    print(2)
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=False, num_workers=1, collate_fn=dataset.collate_fn
     )
 
-    print(3)
     Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
-    print(4)
     labels = []
     sample_metrics = []  # List of tuples (TP, confs, pred)
     for batch_i, (_, imgs, targets) in enumerate(tqdm.tqdm(dataloader, desc="Detecting objects")):
-        print(batch_i)
-        print('imgs: ', imgs)
-        print('targets: ', targets)
-
-        print(5)
         # Extract labels
         labels += targets[:, 1].tolist()
-        print(6)
         # Rescale target
         targets[:, 2:] = xywh2xyxy(targets[:, 2:])
-        print(7)
         targets[:, 2:] *= img_size
 
-        print(8)
         imgs = Variable(imgs.type(Tensor), requires_grad=False)
-        print(9)
 
         with torch.no_grad():
-            print(10)
             outputs = model(imgs)
-            print(outputs)
-            print(11)
             outputs = non_max_suppression(outputs, conf_thres=conf_thres, nms_thres=nms_thres)
-            print(outputs)
 
-        print(12)
         sample_metrics += get_batch_statistics(outputs, targets, iou_threshold=iou_thres)
-        print(13)
-        print(sample_metrics)
 
     # Concatenate sample statistics
-    print(sample_metrics)
     true_positives, pred_scores, pred_labels = [np.concatenate(x, 0) for x in list(zip(*sample_metrics))]
-    print(14)
     precision, recall, AP, f1, ap_class = ap_per_class(true_positives, pred_scores, pred_labels, labels)
-    print(15)
 
     return precision, recall, AP, f1, ap_class
 

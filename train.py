@@ -150,25 +150,6 @@ if __name__ == "__main__":
                 formats["grid_size"] = "%2d"
                 formats["cls_acc"] = "%.2f%%"
                 row_metrics = [formats[metric] % yolo.metrics.get(metric, 0) for yolo in model.yolo_layers]
-                #metric_table += [[metric, *row_metrics]]
-
-                # Tensorboard logging
-                tensorboard_log = {} 
-                for j, yolo in enumerate(model.yolo_layers):
-                    for name, metric in yolo.metrics.items():
-                        if name != "grid_size":
-                            print(1)
-                            # tensorboard_log += [{f"{name}_{j+1}": metric}]
-                            # このしたが一応PyTorch
-                            # tensorboard_log[f"{name}_{j+1}"] = metric
-                # tensorboard_log +=] [{"loss": loss.item()}]
-                # このしたが一応PyTorch
-                # tensorboard_log["loss"] = loss.item()
-                # print(tensorboard_log)
-                # experiment.log_metrics(tensorboard_log, step=batches_done)
-            #    logger.list_of_scalars_summary(tensorboard_log, batches_done)
-
-            #log_str += AsciiTable(metric_table).table
             log_str += f"\nTotal loss {loss.item()}"
 
             # Determine approximate time left for epoch
@@ -176,7 +157,6 @@ if __name__ == "__main__":
             time_left = datetime.timedelta(seconds=epoch_batches_left * (time.time() - start_time) / (batch_i + 1))
             log_str += f"\n---- ETA {time_left}"
 
-            print(log_str)
 
             model.seen += imgs.size(0)
         if epoch % opt.evaluation_interval == 0:
@@ -191,13 +171,6 @@ if __name__ == "__main__":
                 img_size=opt.img_size,
                 batch_size=8,
             )
-            evaluation_metrics = [
-                ("val_precision", precision.mean()),
-                ("val_recall", recall.mean()),
-                ("val_mAP", AP.mean()),
-                ("val_f1", f1.mean()),
-            ]
-            # precision[i]みたいな感じで試す(名前を追加する)
             metrics = {
                 'val_precision_person': precision[0].mean(),
                 'val_precision_ball': precision[1].mean(),
@@ -209,20 +182,10 @@ if __name__ == "__main__":
                 'val_f1': f1.mean()
             }
             experiment.log_metrics(metrics, step=epoch)
-           # logger.list_of_scalars_summary(evaluation_metrics, epoch)
             # Print class APs and mAP
             ap_table = [["Index", "Class name", "AP"]]
             metrics = {}
             for i, c in enumerate(ap_class):
-                # metrics["pricision"+str(class_names[c])] = precision[i]
-                # metrics["recall"+str(class_names[c])] = recall[i]
-                # metrics["AP"+str(class_names[c])] = AP[i]
-                # 検討事項として、、、
-                # そもそもこのやり方でいいのか
-                # AP(precision, recall).meanでいけてるということはそれぞれにもできるのでは
-                # とりあえず試してみてエラー見てやっていく
-            
-
                 ap_table += [[c, class_names[c], "%.5f" % AP[i]]]
             print(AsciiTable(ap_table).table)
             print(f"---- mAP {AP.mean()}")
@@ -232,16 +195,10 @@ if __name__ == "__main__":
             print("Save model: ",  f"checkpoints/yolov3_ckpt_%d.pth" % epoch)
         
         if epoch % 10 == 0:
-            # print("in detection module")
-            # test_model = Darknet(opt.model_def).to("cpu")
-            # print(f"checkpoints/yolov3_ckpt_%d.pth" % epoch)
-            # test_model =  test_model.load_state_dict(torch.load(f"checkpoints/yolov3_ckpt_%d.pth" % epoch))
-            # print(test_model)
-            # test_model.eval()
             model.eval()
-            cv2_img = cv2.imread("data/obj/20190602F-netvspublicvoice前半_00039.jpg")
+            cv2_img = cv2.imread("[filename]")
             cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
-            demo_img = Image.open("data/obj/20190602F-netvspublicvoice前半_00039.jpg")
+            demo_img = Image.open("[filename]")
             shape = np.array(demo_img)
             shape = shape.shape[:2]
             detections = detect_image(demo_img, opt.img_size, model, device, conf_thres=0.5, nms_thres=0.5)
@@ -263,22 +220,9 @@ if __name__ == "__main__":
 
                     color = bbox_colors[int(np.where(unique_labels == int(cls_pred))[0])]
                     # Create a Rectangle patch
-                    # bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=2, edgecolor=color, facecolor="none")
                     # Draw bbox
-                    print(x1, y1, x1+box_w,  y1+box_h)
                     cv2.rectangle(cv2_img, (int(x1), int(y1)), (int(x1+box_w), int(y1+box_h)), color, 4)
-                    # Add the bbox to the plot
-                    # ax.add_patch(bbox)
                     # Add label
                     cv2.putText(cv2_img, classes[int(cls_pred)], (int(x1), int(y1)), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                    # plt.text(
-                    #     x1,
-                    #     y1,
-                    #     s=classes[int(cls_pred)],
-                    #     color="white",
-                    #     verticalalignment="top",
-                    #     bbox={"color": color, "pad": 0},
-                    # )
-
             
             experiment.log_image(cv2_img, name="test_img_{}".format(epoch))

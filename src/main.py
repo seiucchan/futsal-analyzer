@@ -39,7 +39,7 @@ VideoWrite = NewType('VideoWrite', cv2.VideoWriter)
 @click.command()
 @click.option('--config_path', default='config/yolov3.cfg')
 @click.option('--weights_path', default='weights/yolov3.weights')
-@click.option('--class_path', default='data/coco.names')
+@click.option('--class_path', default='data/10-50-img/data/obj.names')
 @click.option('--img_size', default=416)
 @click.option('--conf_thres', default=0.8)
 @click.option('--nms_thres', default=0.4)
@@ -63,6 +63,8 @@ def main(config_path,
          gpu_id, 
          is_show,
          write_video):
+    
+    print(1)
 
     # device
     device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
@@ -173,4 +175,5 @@ def video_writer(path: str, fps: int, width: int, height: int,
 
 
 if __name__ == '__main__':
+    print(0)
     main()

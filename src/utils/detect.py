@@ -2,9 +2,11 @@ from modules.yolo.utils import non_max_suppression
 import torch
 from torchvision import transforms
 from torch.autograd import Variable
+import numpy as np
+from PIL import Image
 
 
-def detect_image(img, img_size, model, device, conf_thres, nms_thres):
+def detect_image(img, img_size, model, device, conf_thres, nms_thres, mask, diff_mode):
     # scale and pad image
     ratio = min(img_size/img.size[0], img_size/img.size[1])
     imw = round(img.size[0] * ratio)
@@ -21,6 +23,9 @@ def detect_image(img, img_size, model, device, conf_thres, nms_thres):
          transforms.ToTensor(),
      ])
     # convert image to Tensor
+    if diff_mode == 1:
+        img = np.dstack([img, mask])
+        img = Image.fromarray(img, mode="RGBA")
     inp = img_transforms(img).float().unsqueeze_(0)
     inp = inp.to(device)
     # run inference on the model and get detections

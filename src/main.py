@@ -30,6 +30,7 @@ from utils.paint_black import paint_black
 from utils.max_ball_selection import max_ball_selection
 from utils.calculate_posession import predict_ball_holder
 from utils.calculate_posession import calculate_posession
+from utils.make_frame_diff import make_frame_diff
 
 
 VideoRead = NewType('VideoRead', cv2.VideoCapture)
@@ -50,6 +51,7 @@ VideoWrite = NewType('VideoWrite', cv2.VideoWriter)
 @click.option('--gpu_id', default=1)
 @click.option('--is_show', default=True)
 @click.option('--write_video', default=True)
+@click.option('--diff_mode', default=0)
 def main(config_path,
          weights_path,
          class_path,
@@ -62,9 +64,9 @@ def main(config_path,
          wname,
          gpu_id, 
          is_show,
-         write_video):
+         write_video,
+         diff_mode):
     
-    print(1)
 
     # device
     device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
@@ -75,6 +77,13 @@ def main(config_path,
         model.load_darknet_weights(weights_path)
     else:
         model.load_state_dict(torch.load(weights_path, map_location="cpu"))
+
+    # Use diff
+    # if diff_mode == 1:
+    #     print(33)
+    #     model.module_list[0][0] = nn.Conv2d(4, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    #     model.state_dict()['module_list.0.conv_0.weight'] = torch.nn.init.xavier_uniform(model.module_list[0][0].weight)
+
     model.to(device)
     model.eval()
 
@@ -82,6 +91,10 @@ def main(config_path,
 
     # input video
     cap, origin_fps, num_frames, width, height = load_video(input)
+    if diff_mode == 1:
+        cap2 = cv2.VideoCapture(input)
+        cap3 = cv2.VideoCapture(input)
+
     # output video
     if write_video:
         writer = video_writer(output, origin_fps, width, height)
@@ -109,6 +122,19 @@ def main(config_path,
     M = calculate_matrix()
     ball_holders = []
 
+    if diff_mode == 1:
+        # make first diff_image
+        frame1 = cap.read()[1]
+        for i in range(50):
+            cap2.read()
+        frame2 = cap2.read()[1]
+        for i in range(100):
+            cap3.read()
+        frame3 = cap3.read()[1]
+
+        mask = make_frame_diff(frame1, frame2, frame3, th=20) 
+
+
     mot_tracker = Sort()
     cnt = 1
     while(cap.isOpened()):
@@ -116,12 +142,26 @@ def main(config_path,
         ret, frame = cap.read()
         if not ret:
             break
+        
+        if diff_mode == 1:
+            if cnt == 1:
+                frame = frame2
+            else:
+                frame1 = cap.read()[1]    
+                frame2 = cap.read()[1]
+                frame3 = cap.read()[1]
+
+                mask = make_frame_diff(frame1, frame2, frame3, th=20)
 
         print('-----------------------------------------------------')
         print('[INFO] Count: {}/{}'.format(cnt, num_frames))
 
-        pilimg = Image.fromarray(frame)
-        bboxes = detect_image(pilimg, img_size, model, device, conf_thres, nms_thres)
+        if diff_mode == 0:
+            pilimg = Image.fromarray(frame2)
+            mask = 0
+        else:
+            pilimg = Image.fromarray(frame2)
+        bboxes = detect_image(pilimg, img_size, model, device, conf_thres, nms_thres, mask, diff_mode)
 
         out = frame
         output_img = generate_plane_field()

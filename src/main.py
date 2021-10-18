@@ -144,20 +144,20 @@ def main(config_path,
             break
         
         if diff_mode == 1:
-            if cnt == 1:
-                frame = frame2
-            else:
-                frame1 = cap.read()[1]    
-                frame2 = cap.read()[1]
-                frame3 = cap.read()[1]
+            frame1 = cap.read()[1]    
+            frame2 = cap.read()[1]
+            frame3 = cap.read()[1]
 
-                mask = make_frame_diff(frame1, frame2, frame3, th=20)
+            mask = make_frame_diff(frame1, frame2, frame3, th=20)
+            mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+            print(mask.size)
+            mask = Image.fromarray(mask, mode='L')
 
         print('-----------------------------------------------------')
         print('[INFO] Count: {}/{}'.format(cnt, num_frames))
 
         if diff_mode == 0:
-            pilimg = Image.fromarray(frame2)
+            pilimg = Image.fromarray(frame)
             mask = 0
         else:
             pilimg = Image.fromarray(frame2)
@@ -166,12 +166,13 @@ def main(config_path,
         out = frame
         output_img = generate_plane_field()
         if bboxes is not None:
+            print(bboxes)
             bboxes = filter_court(bboxes, pilimg, img_size, ptlist)
             track_bbs_ids = mot_tracker.update(bboxes)
             bboxes = max_ball_selection(bboxes)
             preds = team_classifier(frame, pilimg, img_size, bboxes, player_cluster1, player_cluster2, player_cluster3, player_cluster4)
             ball_holders.append(predict_ball_holder(bboxes, preds, M, frame, img_size))
-            print("ball_holders: ", ball_holders)
+            # print("ball_holders: ", ball_holders
             # posession_rate = calculate_posession(ball_holders)
         
             # for i, p_rate in enumerate(posession_rate):
